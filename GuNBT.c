@@ -1,5 +1,5 @@
 #include "GuNBT.h"
-#define GUNBT_H
+#include <errno.h>
 
 void gnbt_parse_file(FILE * fp)
 {
