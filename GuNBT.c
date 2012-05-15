@@ -1,10 +1,11 @@
 #include "GuNBT.h"
 #include <errno.h>
-#define null 0
 
 char * gnbt_read_name(unsigned char * stream)
 {
-    char *
+    int length = *stream;
+    char *name;
+    return name;
 }
 
 gnbt_node * gnbt_read_node(unsigned char * stream)
@@ -59,7 +60,7 @@ gnbt_node * gnbt_read_node(unsigned char * stream)
 
 void gnbt_parse_file(FILE * fp)
 {
-    unsigned char * stream = null;
+    unsigned char * stream = 0;
     gnbt_node * tree = gnbt_readnode(stream);
 
 }
