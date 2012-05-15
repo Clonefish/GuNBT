@@ -6,6 +6,41 @@
 
 #define CHUNK 1024
 
+int deflatenbt(unsigned char * source, long src_len, FILE * dest, int level)
+{
+	int ret, flush;
+	unsigned have;
+	z_stream strm;
+	unsigned char out[CHUNK];
+	
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+	ret = deflateInit(&strm, level);
+	if (ret != Z_OK)
+		return ret;
+	
+	strm.avail_in = src_len;
+	strm.next_in = source;
+	
+	do
+	{
+		strm.avail_out = CHUNK;
+		strm.next_out = out;
+		ret = deflate(&strm, Z_NO_FLUSH);
+		assert(ret != Z_STREAM_ERROR);
+		have = CHUNK - strm.avail_out;
+		if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
+			(void)deflateEnd(&strm);
+			return Z_ERRNO;
+		}
+	} while (strm.avail_out == 0);
+	
+	assert(ret == Z_STREAM_END);
+	(void)deflateEnd(&strm);
+	return Z_OK;
+}
+
 unsigned char * inflatenbt(FILE * source, long * rsize)
 {
 	int ret;
@@ -38,7 +73,8 @@ unsigned char * inflatenbt(FILE * source, long * rsize)
 			break;
 		strm.next_in = in;
 		
-		do {
+		do
+		{
 			strm.avail_out = CHUNK;
 			strm.next_out = out;
 			ret = inflate(&strm, Z_NO_FLUSH);
@@ -79,7 +115,7 @@ unsigned char * inflatenbt(FILE * source, long * rsize)
 		return 1;
 	}
 	long size;
-	unsigned char * buffer = inflatef(fp, &size);
+	unsigned char * buffer = inflatenbt(fp, &size);
 	if(buffer == NULL)
 	{
 		printf("ERROR!\n");
